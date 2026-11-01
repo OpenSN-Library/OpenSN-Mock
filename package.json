@@ -1,9 +1,9 @@
 {
-  "name": "opensn-webui",
+  "name": "opensn-webui-mock",
   "private": true,
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
-  "description": "OpenSN 网络仿真平台前端",
+  "description": "OpenSN 网络仿真平台演示版前端（浏览器内模拟数据，无需后端）",
   "scripts": {
     "dev": "vite",
     "start": "vite",

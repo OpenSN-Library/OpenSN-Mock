@@ -4,3 +4,13 @@ dist
 .DS_Store
 *.log
 .vite
+coverage
+
+# 本地环境变量与编辑器配置
+.env.local
+.env.*.local
+.idea
+.vscode
+
+# macOS 打包产生的隐藏文件
+._*
