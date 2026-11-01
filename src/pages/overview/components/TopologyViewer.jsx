@@ -1,11 +1,29 @@
-import { useEffect, useRef } from 'react'
-import { Cartesian2, Cartesian3, Color } from 'cesium'
-import { Entity, Globe, LabelGraphics, PointGraphics, PolylineGraphics, Scene, Viewer, useCesium } from 'resium'
+import { useEffect, useRef, useState } from 'react'
+import {
+  buildModuleUrl,
+  Cartesian2,
+  Cartesian3,
+  Color,
+  TileMapServiceImageryProvider,
+} from 'cesium'
+import {
+  Entity,
+  Globe,
+  ImageryLayer,
+  LabelGraphics,
+  PointGraphics,
+  PolylineGraphics,
+  Scene,
+  Viewer,
+  useCesium,
+} from 'resium'
 import { useTabs } from '@/context/TabsContext'
 
 const DEFAULT_LINK_COLOR = '#5e6ad2'
 const GLOBE_COLOR = Color.fromCssColorString('#050506')
 const BACKGROUND_COLOR = Color.fromCssColorString('#050506')
+// Cesium 自带的世界地图瓦片，放在本地资源目录里，不依赖在线地图服务
+const EARTH_IMAGERY_URL = buildModuleUrl('Assets/Textures/NaturalEarthII')
 
 function positionToCartesian(position) {
   return Cartesian3.fromRadians(position.longitude, position.latitude, position.altitude)
@@ -56,6 +74,22 @@ export default function TopologyViewer({
   const containerRef = useRef(null)
   const viewerRef = useRef(null)
   const { activeKey } = useTabs()
+  const [earthImagery, setEarthImagery] = useState(null)
+
+  // 加载 Cesium 自带的本地地球影像，保证离线或 GitHub Pages 环境下也能看到地球
+  useEffect(() => {
+    let cancelled = false
+    TileMapServiceImageryProvider.fromUrl(EARTH_IMAGERY_URL)
+      .then((provider) => {
+        if (!cancelled) setEarthImagery(provider)
+      })
+      .catch((error) => {
+        console.error('加载地球影像失败', error)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   // 标签页切换后容器尺寸会变化，通知 Cesium 重新计算画布大小
   useEffect(() => {
@@ -102,7 +136,8 @@ export default function TopologyViewer({
         baseLayer={false}
       >
         <CesiumSelectionCleaner />
-        <Globe baseColor={GLOBE_COLOR} showGroundAtmosphere={false} enableLighting={false} />
+        {earthImagery && <ImageryLayer imageryProvider={earthImagery} />}
+        <Globe baseColor={GLOBE_COLOR} showGroundAtmosphere enableLighting={false} />
         <Scene backgroundColor={BACKGROUND_COLOR} />
 
         {positionedInstances.map((instance) => (

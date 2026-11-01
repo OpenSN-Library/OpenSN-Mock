@@ -99,7 +99,7 @@ git push -u origin main
 | --- | --- |
 | 打开是白屏 | 先看 Settings → Pages 的 Source 是否为 GitHub Actions；再看 Actions 最近一次是否成功；最后看浏览器 Console 有没有资源 404。 |
 | 样式或图标丢失 | 多半是 `vite.config.js` 里的 `base` 被改掉了，应该保持 `'./'`，资源才用相对路径。 |
-| 三维拓扑不显示 | 浏览器要支持 WebGL；先确认 Console 有没有 Cesium 相关报错。首次加载 Cesium 的静态资源会慢一些，等几秒再刷新。底图不请求在线地图服务，断网也能显示地球。 |
+| 三维拓扑不显示 | 浏览器要支持 WebGL；先确认 Console 有没有 Cesium 相关报错。首次加载 Cesium 的静态资源会慢一些，等几秒再刷新。地球影像使用 Cesium 自带的本地资源，不请求在线地图服务，断网也能显示。 |
 | 刷新页面 404 | 本项目用 HashRouter，正常不会出现。如果以后改成 BrowserRouter，Pages 没有路由回退，刷新非首页会 404。 |
 | 页面还是旧内容 | 等 Actions 跑完并显示成功；再强制刷新（Ctrl+Shift+R 或 Cmd+Shift+R）。 |
 | 仓库地址变了 | 到 Settings → Pages 里看实际地址，或到 Actions 的部署记录里点输出的页面链接。 |
