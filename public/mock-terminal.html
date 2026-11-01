@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>模拟终端 · OpenSN 演示版</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #05060a;
+        --panel: #0c0f16;
+        --line: rgba(148, 163, 184, 0.22);
+        --text: #d7e3f4;
+        --muted: #8b97ab;
+        --green: #4ade80;
+        --blue: #7aa2f7;
+        --yellow: #facc15;
+        --red: #f87171;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, 'Courier New', monospace;
+        font-size: 13px;
+      }
+      .term {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      .term-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 8px 14px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+        font-size: 12px;
+        color: var(--muted);
+        flex-wrap: wrap;
+      }
+      .term-title {
+        color: var(--text);
+        font-weight: 600;
+      }
+      .term-bar .badge {
+        padding: 2px 8px;
+        border-radius: 999px;
+        border: 1px solid rgba(250, 204, 21, 0.4);
+        color: var(--yellow);
+      }
+      .term-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 16px 24px;
+        line-height: 1.65;
+      }
+      .line {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .green {
+        color: var(--green);
+      }
+      .blue {
+        color: var(--blue);
+      }
+      .yellow {
+        color: var(--yellow);
+      }
+      .red {
+        color: var(--red);
+      }
+      .prompt-line {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+        align-items: baseline;
+      }
+      .prompt {
+        color: var(--green);
+        flex-shrink: 0;
+      }
+      .input {
+        flex: 1;
+        min-width: 60px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        font: inherit;
+        caret-color: var(--green);
+      }
+      .caret {
+        display: inline-block;
+        width: 7px;
+        height: 14px;
+        background: var(--green);
+        margin-left: 2px;
+        vertical-align: -2px;
+        animation: blink 1s step-end infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .term-foot {
+        padding: 6px 14px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 11px;
+        background: var(--panel);
+      }
+      .term-body::-webkit-scrollbar {
+        width: 8px;
+      }
+      .term-body::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.25);
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="term">
+      <div class="term-bar">
+        <span class="term-title" id="terminal-title">模拟终端</span>
+        <span>
+          <span class="badge">演示终端 · 输出为模拟数据</span>
+        </span>
+      </div>
+      <div class="term-body" id="terminal-body">
+        <div class="line muted">OpenSN 演示版模拟终端。这是浏览器内的演示界面，不会连接真实容器或网络设备。</div>
+        <div class="line muted">输入 help 查看可用命令，输入 clear 清屏。</div>
+      </div>
+      <div class="term-foot">Ctrl+C 无效；命令输出均为演示数据。如需退出，关闭此标签页即可。</div>
+    </div>
+    <script>
+      ;(() => {
+        const params = new URLSearchParams(location.search)
+        const kind = params.get('kind') === 'link' ? 'link' : 'instance'
+        const targetId = params.get('id') || (kind === 'link' ? 'link-01' : 'sat-a1')
+        const targetName = params.get('name') || targetId
+        const session = params.get('session') || '1'
+        const linkMode = kind === 'link'
+
+        const body = document.getElementById('terminal-body')
+        document.getElementById('terminal-title').textContent = linkMode
+          ? `模拟抓包终端 · ${targetId}`
+          : `模拟终端 · ${targetName}`
+
+        const promptText = linkMode ? 'root@probe-01:~#' : `root@${targetName.replace(/\s+/g, '-')}:~#`
+
+        function append(text, className) {
+          const div = document.createElement('div')
+          div.className = `line${className ? ` ${className}` : ''}`
+          div.textContent = text
+          body.insertBefore(div, promptLine)
+          body.scrollTop = body.scrollHeight
+        }
+
+        function appendHtml(html) {
+          const div = document.createElement('div')
+          div.className = 'line'
+          div.innerHTML = html
+          body.insertBefore(div, promptLine)
+          body.scrollTop = body.scrollHeight
+        }
+
+        const promptLine = document.createElement('div')
+        promptLine.className = 'prompt-line'
+        const promptSpan = document.createElement('span')
+        promptSpan.className = 'prompt'
+        promptSpan.textContent = promptText
+        const input = document.createElement('input')
+        input.className = 'input'
+        input.autocomplete = 'off'
+        input.spellcheck = false
+        const caret = document.createElement('span')
+        caret.className = 'caret'
+        promptLine.appendChild(promptSpan)
+        promptLine.appendChild(input)
+        promptLine.appendChild(caret)
+        body.appendChild(promptLine)
+
+        input.addEventListener('input', () => {
+          caret.style.display = input.value ? 'none' : 'inline-block'
+        })
+        input.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter') return
+          const command = input.value.trim()
+          input.value = ''
+          caret.style.display = 'inline-block'
+          runCommand(command)
+        })
+        setTimeout(() => input.focus(), 100)
+        body.addEventListener('click', () => input.focus())
+
+        function infoBlock() {
+          if (linkMode) {
+            append(`链路：${targetId}`, 'blue')
+            append('类型：Wireless  ·  发送/接收速率：约 1.1 Mbps / 0.9 Mbps')
+            append('两端：' + targetId.replace('link-', '节点 '))
+            append('会话编号：' + session)
+            append('提示：演示版没有真实数据包，tcpdump 输出是自动生成的示例。', 'muted')
+          } else {
+            append(`节点：${targetName}（${targetId}）`, 'blue')
+            append('地址：10.20.0.11/24  ·  网关：10.20.0.1')
+            append('状态：运行中  ·  镜像：opensn/satellite-router:1.4.2')
+            append('提示：演示版不会真的进入容器，这里的命令输出都是示例。', 'muted')
+          }
+        }
+
+        let packetTimer = null
+        function startPackets() {
+          if (packetTimer) return
+          append('tcpdump: verbose output suppressed, use -v for full protocol decode', 'muted')
+          append('listening on any, link-type LINUX_SLL, capture size 262144 bytes', 'muted')
+          const peers = ['10.20.1.2', '10.20.5.1', '10.20.19.2', '10.20.13.1']
+          packetTimer = setInterval(() => {
+            const peer = peers[Math.floor(Math.random() * peers.length)]
+            const port = 30000 + Math.floor(Math.random() * 20000)
+            const length = 64 + Math.floor(Math.random() * 1200)
+            const time = new Date().toISOString().slice(11, 23)
+            append(
+              `${time} IP 10.20.0.11.${port > 20000 ? 'ssh' : 'ipsec-nat-t'} > ${peer}.${port}: UDP, length ${length}`,
+            )
+          }, 1500)
+        }
+        function stopPackets() {
+          if (!packetTimer) {
+            append('tcpdump: 当前没有正在运行的抓包任务', 'muted')
+            return
+          }
+          clearInterval(packetTimer)
+          packetTimer = null
+          append('^C', 'yellow')
+          append('抓包已停止，共捕获 ' + (120 + Math.floor(Math.random() * 80)) + ' 个数据包', 'muted')
+        }
+
+        function commandList() {
+          append('可用命令：', 'yellow')
+          append('  help                 显示这个帮助')
+          append('  info                 查看当前节点或链路信息')
+          append('  ls                  列出当前目录')
+          append('  ifconfig            查看网络接口（模拟输出）')
+          append('  ping <地址>          发送模拟 ping')
+          append('  tcpdump             ' + (linkMode ? '开始/停止抓包（模拟）' : '查看抓包任务说明（模拟节点没有抓包权限）'))
+          append('  ps                   查看进程列表')
+          append('  clear                清屏')
+        }
+
+        function runCommand(command) {
+          const raw = command
+          append(`${promptText} ${command}`)
+          if (!command) return
+
+          const [name, ...args] = command.split(/\s+/)
+          switch (name) {
+            case 'help':
+              commandList()
+              break
+            case 'info':
+              infoBlock()
+              break
+            case 'ls':
+              append('config/    data/    logs/    images/    README.txt', 'blue')
+              break
+            case 'ifconfig':
+              append('eth0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500')
+              append('        inet 10.20.0.11  netmask 255.255.255.0  broadcast 10.20.0.255')
+              append('        inet6 fd00:20:1::11  prefixlen 64  scopeid 0x20<link>')
+              append('        ether 02:00:00:01:02:03  txqueuelen 1000  (Ethernet)')
+              append('lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536')
+              append('        inet 127.0.0.1  netmask 255.0.0.0')
+              break
+            case 'ping': {
+              const host = args[0] || '10.20.0.1'
+              ;[0, 1, 2].forEach((index) => {
+                setTimeout(() => {
+                  const ms = (0.2 + Math.random() * 0.6).toFixed(3)
+                  append(`64 bytes from ${host}: icmp_seq=${index + 1} ttl=64 time=${ms} ms`)
+                }, 350 * (index + 1))
+              })
+              break
+            }
+            case 'tcpdump':
+              if (linkMode) {
+                if (packetTimer) stopPackets()
+                else startPackets()
+              } else {
+                append('演示版节点终端不提供真实抓包，请到链路详情页打开抓包终端。', 'muted')
+              }
+              break
+            case 'ps':
+              append('  PID TTY          TIME CMD')
+              append('    1 pts/0    00:00:00 init')
+              append('   18 pts/0    00:00:00 opensn-node')
+              append('   42 pts/0    00:00:00 ospfd')
+              append('   87 pts/0    00:00:00 sh')
+              break
+            case 'clear':
+              body.innerHTML = ''
+              body.appendChild(promptLine)
+              break
+            case 'exit':
+              append('演示终端不退出进程，关闭标签页即可。', 'muted')
+              break
+            default:
+              append(`bash: ${name}: command not found`, 'red')
+          }
+          if (raw === 'tcpdump' && linkMode && packetTimer) return
+          setTimeout(() => {
+            body.scrollTop = body.scrollHeight
+            input.focus()
+          }, 50)
+        }
+
+        if (linkMode) {
+          infoBlock()
+          startPackets()
+        } else {
+          append('正在连接节点 ' + targetName + ' ...', 'muted')
+          setTimeout(() => {
+            append('连接成功。输入 help 查看可用命令。', 'green')
+            input.focus()
+          }, 600)
+        }
+      })()
+    </script>
+  </body>
+</html>

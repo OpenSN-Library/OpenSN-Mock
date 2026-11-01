@@ -109,6 +109,15 @@ export default function FileManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 演示数据被重置后，重新读取文件目录，避免继续显示旧的演示文件
+  useEffect(() => {
+    const handleReset = () => {
+      loadRoot()
+    }
+    window.addEventListener('opensn-mock-reset', handleReset)
+    return () => window.removeEventListener('opensn-mock-reset', handleReset)
+  }, [loadRoot])
+
   const handleRefresh = async () => {
     setRefreshing(true)
     try {

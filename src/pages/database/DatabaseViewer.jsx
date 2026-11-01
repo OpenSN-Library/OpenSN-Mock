@@ -84,6 +84,20 @@ export default function DatabaseViewer() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // 演示数据被重置后，重新读取键列表并清空已选条目
+  useEffect(() => {
+    const handleReset = () => {
+      setSelectedKeys([])
+      setSelectedEntryKey('')
+      setEditorValue(null)
+      setIsTextEntry(false)
+      editorContentRef.current = null
+      loadItems()
+    }
+    window.addEventListener('opensn-mock-reset', handleReset)
+    return () => window.removeEventListener('opensn-mock-reset', handleReset)
+  }, [loadItems])
+
   const handleSelect = (keys) => {
     const entryKey = entryPathMapRef.current[keys[0] || ''] || ''
     setSelectedKeys(keys)

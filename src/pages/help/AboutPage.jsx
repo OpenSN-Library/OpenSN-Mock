@@ -12,15 +12,17 @@ const TECH_STACK = [
   { name: 'ECharts 5', detail: '绘制节点与链路的资源曲线' },
   { name: 'Cesium', detail: '三维地球与拓扑展示，通过 resium 集成' },
   { name: 'vanilla-jsoneditor', detail: '数据库条目与 JSON 配置的查看和编辑' },
+  { name: '浏览器模拟数据', detail: '拦截接口请求，在浏览器内生成节点、链路、资源和文件数据' },
 ]
 
 const DIRECTORIES = [
   'src/pages/：各功能页面，按业务分目录',
   'src/components/：通用组件与布局组件',
-  'src/api/：后端接口模块，统一挂在 /api 下',
+  'src/api/：接口模块；src/api/mock/ 下是演示用的模拟数据和模拟接口',
   'src/hooks/、src/context/：轮询、标签页、抽屉等复用逻辑',
   'src/styles/：主题变量与布局样式',
   'src/router/：路由、菜单与面包屑配置',
+  'public/mock-terminal.html：演示用的模拟终端页面',
 ]
 
 function mutedStyle(extra = {}) {
@@ -50,21 +52,21 @@ export default function AboutPage() {
       <div className="stack">
         <GlassCard title="项目简介">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
-            {appConfig.title}前端（{appConfig.name} Web UI），用于{appConfig.description}。
-            界面为中文，页面数据全部来自后端接口，不在浏览器中保存业务数据。
+            {appConfig.title}演示版（{appConfig.name} Web UI）。页面数据由浏览器内的模拟接口生成，
+            不请求后端，也不会连接真实设备，可以单独放到 GitHub Pages 上展示。
           </Paragraph>
           <div className="metric-list">
             <div className="metric-item">
               <div className="metric-label">当前版本</div>
-              <div className="metric-value">2.0.0</div>
+              <div className="metric-value">2.1.0</div>
             </div>
             <div className="metric-item">
               <div className="metric-label">构建工具</div>
               <div className="metric-value">Vite 5</div>
             </div>
             <div className="metric-item">
-              <div className="metric-label">接口前缀</div>
-              <div className="metric-value">/api</div>
+              <div className="metric-label">数据来源</div>
+              <div className="metric-value">浏览器模拟</div>
             </div>
           </div>
         </GlassCard>
@@ -109,16 +111,16 @@ export default function AboutPage() {
           </GlassCard>
         </div>
 
-        <GlassCard title="与旧版 ui 的关系">
+        <GlassCard title="与 ui-new 的关系">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
-            仓库里的 ui/ 是旧版前端，ui-new/ 是在保留后端接口的前提下重写的前端版本：
-            路由、通用组件、样式和页面结构都重新组织过，目前版本号为 2.0.0。
+            本仓库从 ui-new 复制而来，把接口请求换成了浏览器内的模拟实现，用来在 GitHub Pages 上演示界面和交互。
+            真实的 OpenSN 项目仍使用 ui-new 连接后端运行，目前版本号为 2.1.0。
           </Paragraph>
           <Bullets
             items={[
-              '旧版 ui/ 暂时保留，便于对照旧功能和旧数据，不再作为主要开发目标。',
-              '新版页面只在 ui-new/ 中维护；两边调用同一套后端接口，但不要同时操作同一个模拟环境。',
-              '如果旧版和新版对同一数据的展示不一致，以后端接口返回和新版页面为准。',
+              'ui-new 是连接真实后端的前端版本，ui-mock 是只用于演示的静态版本。',
+              '两个版本的页面、布局和接口调用方式保持一致，便于同步修改。',
+              '演示数据保存在浏览器本地，清理浏览器数据或点击重置即可恢复。',
             ]}
           />
         </GlassCard>

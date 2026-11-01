@@ -39,6 +39,20 @@ export default function HelpPage() {
       description="各页面的用途、关键字段和常见问题；遇到异常时先按文末的常见问题排查"
     >
       <div className="stack">
+        <GlassCard title="演示版说明">
+          <Paragraph style={{ color: 'var(--foreground-muted)' }}>
+            本页是 OpenSN 演示版，所有数据都由浏览器内的模拟接口生成，不需要连接后端，也不会访问任何真实设备。
+          </Paragraph>
+          <Bullets
+            items={[
+              '启动、停止模拟，启停节点，上传拓扑，修改文件或数据库条目等操作，改动的都是当前浏览器里的演示数据。',
+              '演示数据会保存在浏览器本地，刷新页面后仍在；点击概览页的“重置模拟环境”可以恢复初始数据。',
+              '远程终端和抓包终端显示的是模拟界面，命令输出为示例内容，不会进入真实容器。',
+              '页面右上角的“演示数据”标记表示当前处于演示模式。',
+            ]}
+          />
+        </GlassCard>
+
         <GlassCard title="概览">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
             概览是打开系统后的首页。顶部卡片显示模拟是否运行、部署机器数、网络节点数和链路数，
@@ -70,7 +84,7 @@ export default function HelpPage() {
 
         <GlassCard title="链路管理">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
-            链路连接两个网络节点，列表和详情都来自后端链路接口。
+            链路连接两个网络节点，列表和详情来自本地模拟数据。
           </Paragraph>
           <Bullets
             items={[
@@ -84,21 +98,21 @@ export default function HelpPage() {
 
         <GlassCard title="文件管理">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
-            文件管理操作的是后端工作目录里的文件，不是浏览器本地文件。左侧是目录树，右侧是文本预览。
+            演示版的文件管理操作的是浏览器里的虚拟目录，不是真实服务器文件。左侧是目录树，右侧是文本预览。
           </Paragraph>
           <Bullets
             items={[
               '目录树为懒加载：展开文件夹时才请求该层列表；文件名后面的数字是文件大小。',
-              '点击文本文件在右侧查看内容，只能用文本方式预览，二进制文件即使能下载也会显示为乱码。',
+              '点击文本文件在右侧查看内容，只能用文本方式预览。',
               '上传会保存到当前目录：选中文件夹时是该文件夹，选中文件或未选中时是文件所在的目录，上传成功后列表会自动刷新。',
-              '下载通过 /file/download 接口获取文件；删除前会二次确认，删除后无法恢复。',
+              '下载会直接保存文件内容；删除前会二次确认，删除后无法恢复。',
             ]}
           />
         </GlassCard>
 
         <GlassCard title="数据库查看">
           <Paragraph style={{ color: 'var(--foreground-muted)' }}>
-            数据库查看用来查看和修改后端键值数据库里的条目。键按 / 分成层级（例如 /a/b/c），右侧用 JSON 编辑器展示条目内容。
+            数据库查看用来查看和修改演示用的键值数据。键按 / 分成层级（例如 /a/b/c），右侧用 JSON 编辑器展示条目内容。
           </Paragraph>
           <Bullets
             items={[
@@ -116,12 +130,10 @@ export default function HelpPage() {
             页面每 8 秒刷新一次，启动后可以等一次刷新；还需要浏览器支持 WebGL。
           </FaqItem>
           <FaqItem question="图表没有数据。">
-            模拟未启动或启动时间太短时，周期资源还没累积起来；先确认所选时间范围覆盖了运行时段。
-            如果后端没有采集到资源，曲线也会为空，可以查看后端日志或资源接口返回。
+            先确认模拟已启动，并且节点处于运行状态；演示数据按时间生成，启动后等一次刷新即可看到曲线。
           </FaqItem>
-          <FaqItem question="页面数据全部为空或提示请求失败。">
-            通常是后端服务没有启动，或者前端没有走 /api 代理。开发环境下前端会把 /api 代理到本机 8080 端口，
-            需要确认后端已监听该端口；可以打开浏览器网络面板查看失败请求，再对照后端日志。
+          <FaqItem question="页面数据没有变化，或者操作没有反应。">
+            演示版的数据保存在浏览器里，操作只影响当前页面。如果数据乱了，可以在概览页点击“重置模拟环境”恢复初始数据。
           </FaqItem>
           <FaqItem question="文件列表是空的。">
             当前目录确实没有文件，或者后端工作目录配置有误。可以先上传一个文件，刷新后确认是否出现在列表中。

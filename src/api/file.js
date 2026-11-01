@@ -1,4 +1,5 @@
 import client from './client'
+import { readMockFileContent } from './mock/server'
 
 export const fileApi = {
   list: (path = '') => client.get('/file/list', { params: { path } }),
@@ -9,8 +10,9 @@ export const fileApi = {
     return client.post('/file/', formData, { params: { path } })
   },
   remove: (path) => client.delete('/file/', { params: { path } }),
+  // 演示版没有后端下载接口，直接把文件内容转成 data URL 交给浏览器下载
   downloadUrl: (path = '') => {
-    const fileName = path.split('/').pop() || ''
-    return `/api/file/download/${encodeURIComponent(fileName)}?path=${encodeURIComponent(path)}`
+    const content = readMockFileContent(path)
+    return `data:text/plain;charset=utf-8,${encodeURIComponent(content)}`
   },
 }

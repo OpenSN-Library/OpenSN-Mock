@@ -87,12 +87,15 @@ export default function NodeDetail({ nodeIndex, instanceId }) {
     try {
       const res = await webshellApi.startInstance(nodeIndex, instanceId)
       const info = res?.data || {}
-      if (!info.addr || !info.port) throw new Error('终端地址为空')
+      // 真实后端返回 addr/port，演示版直接返回内置终端页面地址
+      const terminalUrl =
+        info.url || (info.addr && info.port ? `http://${info.addr}:${info.port}` : '')
+      if (!terminalUrl) throw new Error('终端地址为空')
       sessionSeq.current += 1
       const key = `${instanceId}-${sessionSeq.current}`
       setSessions((prev) => [
         ...prev,
-        { key, label: `终端 ${sessionSeq.current}`, url: `http://${info.addr}:${info.port}` },
+        { key, label: `终端 ${sessionSeq.current}`, url: terminalUrl },
       ])
       setActiveSessionKey(key)
       message.success('终端已打开')

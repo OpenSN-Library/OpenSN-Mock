@@ -78,8 +78,11 @@ export default function LinkDetail({ nodeIndex, linkId }) {
     try {
       const res = await webshellApi.startLink(linkId, nodeIndex)
       const info = res?.data || {}
-      if (!info.addr || !info.port) throw new Error('抓包终端地址为空')
-      setDumpUrl(`http://${info.addr}:${info.port}`)
+      // 真实后端返回 addr/port，演示版直接返回内置终端页面地址
+      const terminalUrl =
+        info.url || (info.addr && info.port ? `http://${info.addr}:${info.port}` : '')
+      if (!terminalUrl) throw new Error('抓包终端地址为空')
+      setDumpUrl(terminalUrl)
       message.success('抓包终端已启动')
     } catch (err) {
       message.error(err?.message || '启动抓包终端失败')

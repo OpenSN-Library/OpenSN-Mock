@@ -109,7 +109,7 @@ export default function RuntimeControls({ running, resource, onChanged }) {
         </div>
 
         <div className="text-subtle" style={{ fontSize: 'var(--fs-xs)' }}>
-          上传的配置文件会直接发送给后端，不会保存在浏览器中。
+          上传的配置文件会应用到当前演示数据，不会发送到后端。
         </div>
       </div>
     </GlassCard>

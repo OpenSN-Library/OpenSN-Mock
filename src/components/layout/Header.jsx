@@ -1,4 +1,5 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons'
+import { Tag } from 'antd'
 import { useLocation } from 'react-router-dom'
 import ThemeToggle from './ThemeToggle'
 import { resolveRouteTitle } from '@/router/routes'
@@ -19,6 +20,9 @@ export default function Header({ collapsed, onToggleCollapse }) {
           {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         </span>
         <span className="header-title">{title}</span>
+        <Tag color="gold" style={{ marginLeft: 12 }}>
+          演示数据
+        </Tag>
       </div>
       <div className="header-right">
         <ThemeToggle />

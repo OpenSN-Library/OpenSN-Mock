@@ -1,12 +1,25 @@
 import axios from 'axios'
+import { handleMockRequest } from './mock/server'
 
-// 后端与前端同源部署，接口统一挂在 /api 下；开发时由 vite 代理到本机 8080 端口
+// 演示版没有后端：所有请求都由浏览器内的模拟接口处理。
+// 页面里的接口调用方式与真实版完全一致，只是不再发出网络请求。
 const client = axios.create({
   baseURL: '/api',
-  timeout: 60000,
+  timeout: 20000,
+  adapter: async (config) => {
+    const body = await handleMockRequest(config)
+    return {
+      data: body,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config,
+      request: {},
+    }
+  },
 })
 
-// 后端统一返回 { code, msg, data }，这里直接把 data 交给调用方
+// 统一处理 { code, msg, data } 返回结构，与真实版保持一致
 client.interceptors.response.use(
   (response) => {
     const body = response.data
@@ -17,7 +30,7 @@ client.interceptors.response.use(
   },
   (error) => {
     const body = error?.response?.data
-    const message = body?.msg || body?.message || error?.message || '网络请求失败'
+    const message = body?.msg || body?.message || error?.message || '演示数据请求失败'
     return Promise.reject(new Error(message))
   },
 )
