@@ -1,0 +1,30 @@
+{
+  "name": "opensn-webui",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "OpenSN 网络仿真平台前端",
+  "scripts": {
+    "dev": "vite",
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.4.0",
+    "antd": "^5.20.6",
+    "axios": "^1.7.7",
+    "cesium": "^1.115.0",
+    "echarts": "^5.5.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.2",
+    "resium": "^1.17.2",
+    "vanilla-jsoneditor": "^0.23.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.6",
+    "vite-plugin-cesium": "^1.2.23"
+  }
+}

@@ -1,0 +1,15 @@
+.json-editor {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.json-editor .jse-jsoneditor,
+.json-editor .jse-main {
+  height: 100%;
+}
+
+.json-editor .jse-contents,
+.json-editor .jse-tree-mode {
+  background: transparent;
+}
