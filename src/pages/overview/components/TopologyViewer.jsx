@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Cartesian2, Cartesian3, Color } from 'cesium'
-import { Entity, Globe, LabelGraphics, PointGraphics, PolylineGraphics, Scene, Viewer } from 'resium'
+import { Entity, Globe, LabelGraphics, PointGraphics, PolylineGraphics, Scene, Viewer, useCesium } from 'resium'
 import { useTabs } from '@/context/TabsContext'
 
 const DEFAULT_LINK_COLOR = '#5e6ad2'
@@ -9,6 +9,38 @@ const BACKGROUND_COLOR = Color.fromCssColorString('#050506')
 
 function positionToCartesian(position) {
   return Cartesian3.fromRadians(position.longitude, position.latitude, position.altitude)
+}
+
+/**
+ * Cesium 默认会在点击时选中实体、在双击时把相机锁定到实体上。
+ * 本页的交互是“双击打开详情标签页”，不需要保留选中/跟踪状态，
+ * 所以这里在点击后把状态清掉，避免出现无法取消的选中效果。
+ */
+function CesiumSelectionCleaner() {
+  const { viewer } = useCesium()
+
+  useEffect(() => {
+    if (!viewer || viewer.isDestroyed?.()) return undefined
+    const canvas = viewer.scene.canvas
+
+    const clearSelection = () => {
+      // 放到下一轮事件循环，等 Cesium 和 resium 自己处理完点击再清理
+      window.setTimeout(() => {
+        if (viewer.isDestroyed?.()) return
+        viewer.selectedEntity = undefined
+        viewer.trackedEntity = undefined
+      }, 0)
+    }
+
+    canvas.addEventListener('click', clearSelection)
+    canvas.addEventListener('dblclick', clearSelection)
+    return () => {
+      canvas.removeEventListener('click', clearSelection)
+      canvas.removeEventListener('dblclick', clearSelection)
+    }
+  }, [viewer])
+
+  return null
 }
 
 export default function TopologyViewer({
@@ -65,11 +97,11 @@ export default function TopologyViewer({
         navigationHelpButton={false}
         fullscreenButton={false}
         baseLayerPicker={false}
-        sceneModePicker={false}
         infoBox={false}
         selectionIndicator={false}
         baseLayer={false}
       >
+        <CesiumSelectionCleaner />
         <Globe baseColor={GLOBE_COLOR} showGroundAtmosphere={false} enableLighting={false} />
         <Scene backgroundColor={BACKGROUND_COLOR} />
 
